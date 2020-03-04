@@ -1,6 +1,7 @@
-# A crawl through wikipedia to find the movies an actor has been in or the actors in a
-# show.
+# A crawl through wikipedia to find the movies an actor has been in
+# or the actors the actor has worked with.
 # This is a scraper dealing with variable formats in Wikipedia.
+
 # Using:
 # BeautifulSoup
 # lxml
@@ -12,7 +13,6 @@ import re
 import time
 import csv
 
-# @TODO put on github
 
 # A rate limiting function to use as a decorator on the functions you need to limit
 def RateLimited(maxPerSecond):
@@ -48,9 +48,9 @@ def get_movie_links(actor_url):
 
     # check for off-page filmography link
     if filmography.parent.parent.find_next_sibling(role='note'):
-        # print(filmography.parent.parent.find_next_sibling())
+
         link_to_filmography = filmography.parent.parent.find_next_sibling().a.get('href')
-        # print(link_to_filmography)
+
         html = urlopen('http://en.wikipedia.org' + link_to_filmography)
         soup = BeautifulSoup(html, "lxml")
         filmography = soup.find(class_="mw-headline").string
@@ -61,8 +61,6 @@ def get_movie_links(actor_url):
     for i in range(next_sib_len):
         film_table = filmography.parent.parent.find_next_siblings()[i]
         if film_table.find('tbody'):
-            # print(film_table)
-            # print('NEXT \n')
             links = film_table.find_all('i')
             for link in links:
                try:
@@ -93,10 +91,8 @@ def get_actor_links(movie_url):
     if soup.find(id='Cast_and_characters'):
         cast_sections = soup.find(id='Cast_and_characters').parent.find_next_siblings()
     for section in cast_sections:
-        # print(section.name)
         if section.name == 'ul' or section.name == 'div':
             actor_tags = section.find_all('li')
-            # print('actor tags:', actor_tags)
             for actor_tag in actor_tags:
                 try:
                     actor_link = actor_tag.find(href=href_name).get('href')
@@ -105,10 +101,6 @@ def get_actor_links(movie_url):
                 actor_links.append(actor_link)
 
         if section.name == 'p':
-            # print(section)
-            # print('NEXT AGAIN \n')
-            # actor_links_2 = section.find_all('a', class_='')
-            # print(actor_links_2)
             actor_links_2 = section.find_all(href=href_name)
             for link in actor_links_2:
                 actor_link = link.get('href')
@@ -127,21 +119,6 @@ def href_name(href):  # try to capture only valid hrefs
 def href_show(href):  # try to capture only valid hrefs
     return href and re.compile("/wiki/").search(href)
 
-# for testing:
-# links = get_movie_links("/wiki/Henry_Cavill")  # multiple filmograpy tables on main
-# page
-# links = get_movie_links("/wiki/Kevin_Bacon")  # seperate filmography page
-# links = get_movie_links("/wiki/Freya_Allan")   # single filmography table
-# links = get_movie_links("/wiki/Charlize_Theron")
-# links = get_movie_links("/wiki/Dennis_Hopper")
-# links = get_movie_links("/wiki/Harrison_Ford")
-# links = get_actor_links("/wiki/Avengers:_Endgame")
-# links = get_actor_links("/wiki/The_Witcher_(TV_series)")
-# links = get_actor_links("/wiki/Blade_Runner_2049")
-# links = get_actor_links("/wiki/The_Magicians_(American_TV_series)")
-# links = get_actor_links("/wiki/Star_Wars_(film)")
-# links = get_actor_links("/wiki/Dude_Bro_Party_Massacre_III")
-# print(links)
 
 if __name__ == '__main__':
     actor_name = input('Please enter the actor name in the format Name_Surname \n')
@@ -156,7 +133,7 @@ if __name__ == '__main__':
         print("Not Found. Try checking the spelling?")
 
     print('Number of shows:', len(shows_acted_in))
-    print('SHOWS:',shows_acted_in)
+    #print('SHOWS:',shows_acted_in)
 
     actors_list = []
     for show in shows_acted_in:
@@ -181,7 +158,7 @@ if __name__ == '__main__':
         wr = csv.writer(myfile, delimiter=',')
         wr.writerow(clean_list)
 
-    print('People Worked with:', actors_list)
+    # print('People Worked with:', actors_list)
     if '/wiki/Kevin_Bacon' in actors_list:
         print('Linked to Kevin Bacon with a Bacon number of 1')
     else:
